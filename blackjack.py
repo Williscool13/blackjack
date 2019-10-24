@@ -60,6 +60,14 @@ class Dealer(Hand):
             self.hand.append(card)
             print('The dealer drew ' + card.to_string())
 
+    def reduce(self):
+        for card in self.hand:
+            if card.is_buffed_ace():
+                print(card.to_string() + ' has automatically been reduced in value to 1')
+                card.value = 1
+                return True
+        return False
+
 class Deck(object):
     '''The Deck class
     Representation of the deck object as a class.
@@ -121,12 +129,35 @@ def blackjack():
             else:
                 print('Bust! Your hand exceeded 21!')
                 print('Your hand value totals up to: ' + str(player.hand_value()))
-                turn = 'end'
+                turn = 'player_end'
 
 
+    while turn == 'dealer':
+        print("The dealer's hand currently contains: " + dealer.to_string())
+        print('And has a value of: ' + str(dealer.hand_value()))
+        turn = 'compare'
+        while dealer.hand_value() < 18:
+            print('Dealer hits')
+            dealer.add(deck.draw(1))
+            if dealer.is_invalid():
+                if dealer.reduce():
+                    continue
+                else:
+                    turn = 'dealer_end'
 
 
-        break
+    if turn == 'compare':
+        if player.hand_value() == dealer.hand_value():
+            print('push, hands equal')
+        elif player.hand_value() > dealer.hand_value():
+            print('win! your hand bigger')
+        else:
+            print('lose! your hand smaller')
+    elif turn == 'player_end':
+        print('lose! you bust')
+    elif turn == 'dealer_end':
+        print('win! dealer bust')
+
 
 
 
