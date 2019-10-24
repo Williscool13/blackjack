@@ -87,6 +87,7 @@ class Deck(object):
            Arguments:
                multiplier: A float, determines how many decks are used.
         '''
+        print('Deck Created!')
         self.deck = []
         self.refill_deck(multiplier)
 
@@ -148,8 +149,10 @@ class Blackjack(object):
 
             if self.player.is_invalid():
                 if not self.player.reduce():
-                    print('You lose, you overshot')
-                    print(' ')
+
+                    print('Your hand currently contains: ' + self.player.to_string())
+                    print('And has a value of: ' + str(self.player.hand_value()))
+                    print('Bust! You Lose!')
                     return 'end_l'
 
     def dealer_turn(self):
@@ -197,21 +200,32 @@ class Blackjack(object):
 
 
 def main():
+    play = None
+    while play != 'y' and play != 'n':
+        play = input('Would you like to play a game? (y/n)').lower()
     game = Blackjack()
+    print('Welcome to Blackjack!')
+    sleep(2)
     game.create_deck(1)
+    sleep(2)
     game.initial_draw()
-    print('-' * 50)
-    print("PLAYER's TURN")
-    game_outcome = game.player_turn()
+    sleep(3)
+    game_outcome = 'play'
+    if game_outcome == 'play':
+        print('-' * 50)
+        print("PLAYER's TURN")
+        game_outcome = game.player_turn()
+
     if game_outcome == 'play':
         print('-' * 50)
         print("DEALER's TURN")
         game_outcome = game.dealer_turn()
+
     if game_outcome == 'play':
         print('-' * 50)
         print("COMPARISON TURN")
         game_outcome = game.comparison()
-    print('-' * 10 + '\n' + game_outcome)
+
 
 if __name__ == '__main__':
     main()
