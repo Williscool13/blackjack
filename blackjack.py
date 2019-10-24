@@ -89,6 +89,9 @@ class Deck(object):
 
     def draw(self, qty):
         cards_drawn = []
+        if not deck:
+            self.refill_deck()
+            self.shuffle()
         for i in range(qty):
             cards_drawn.append(self.deck.pop())
         return cards_drawn
