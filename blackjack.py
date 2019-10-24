@@ -7,6 +7,8 @@ class Card(object):
         self.value = None
         if value == 0:
             self.value = 11
+        elif value > 9:
+            self.value = 10
         else:
             self.value = value + 1
 
@@ -24,25 +26,50 @@ class Hand(object):
     def __init__(self):
         self.hand = []
 
-    def draw(self, card):
-        self.hand.append(card)
+    def add(self, cards):
+        for card in cards:
+            self.hand.append(card)
 
     def to_string(self):
-        print(', '.join([card.to_string() for card in self.hand]))
+        return(', '.join([card.to_string() for card in self.hand]))
 
+    def hand_value(self):
+        return(sum([card.value for card in self.hand]))
+
+
+    def is_invalid(self):
+        pass
+
+class Player(Hand):
+    def add(self, cards):
+        for card in cards:
+            self.hand.append(card)
+            print('You drew ' + card.to_string())
+
+class Dealer(Hand):
+    def add(self, cards):
+        for card in cards:
+            self.hand.append(card)
+            print('The dealer drew ' + card.to_string())
 
 class Deck(object):
     '''The Deck class
-    Representation of the deck object as a class
+    Representation of the deck object as a class.
     '''
     def __init__(self, multiplier):
+        '''Initializes deck.
+
+           Arguments:
+               multiplier: A float, determines how many decks are used.
+        '''
         self.deck = []
         self.refill_deck(multiplier)
 
-    def draw(self):
-        card_drawn = self.deck.pop()
-        print(card_drawn.to_string() + ' was drawn')
-        return card_drawn
+    def draw(self, qty):
+        cards_drawn = []
+        for i in range(qty):
+            cards_drawn.append(self.deck.pop())
+        return cards_drawn
 
     def is_empty(self):
         return not self.deck
@@ -52,18 +79,50 @@ class Deck(object):
             self.deck.append(Card(i // 13, i % 13))
 
     def to_string(self):
-        print(', '.join([card.to_string() for card in self.deck]))
+        return(', '.join([card.to_string() for card in self.deck]))
 
 
+
+def blackjack():
+    print('Welcome to Blackjack')
+    deck = Deck(1)
+    gamestate = 'unresolved'
+
+
+    #player's turn
+    turn = 'player'
+    player = Player()
+    dealer = Dealer()
+    print('You draw 2 cards')
+    player.add(deck.draw(2))
+    print('The dealer draws 2 cards')
+    dealer.add(deck.draw(2))
+    while turn == 'player':
+        print('Your hand currently contains: ' + player.to_string())
+        print('And has a value of: ' + str(player.hand_value()))
+        decision = None
+        while decision != 'H' and decision != 'S':
+            decision = input('Would you like to (H)it or (S)tand? ').upper()
+        if decision == 'H':
+            player.add(deck.draw(1))
+        else:
+            turn = 'dealer'
+
+        if player.is_invalid():
+            print('Bust! Your hand exceeded 21!')
+            print('Your hand value totals up to: ' + str(player.hand_value()))
+            turn = 'end'
+
+
+
+
+        break
 
 
 
 
 def main():
-    player = Hand()
-    #instantiate a deck of 52 cards
-    deck = Deck(1)
-
+    blackjack()
 
 
 
