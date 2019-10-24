@@ -38,13 +38,21 @@ class Hand(object):
 
 
     def is_invalid(self):
-        pass
+        return self.hand_value() > 21
 
 class Player(Hand):
     def add(self, cards):
         for card in cards:
             self.hand.append(card)
             print('You drew ' + card.to_string())
+
+    def reduce(self):
+        for card in self.hand:
+            if card.is_buffed_ace():
+                print(card.to_string() + ' has automatically been reduced in value to 1')
+                card.value = 1
+                return True
+        return False
 
 class Dealer(Hand):
     def add(self, cards):
@@ -87,8 +95,7 @@ def blackjack():
     print('Welcome to Blackjack')
     deck = Deck(1)
     gamestate = 'unresolved'
-
-
+    deck.deck[-1] = deck.deck[0]
     #player's turn
     turn = 'player'
     player = Player()
@@ -109,9 +116,12 @@ def blackjack():
             turn = 'dealer'
 
         if player.is_invalid():
-            print('Bust! Your hand exceeded 21!')
-            print('Your hand value totals up to: ' + str(player.hand_value()))
-            turn = 'end'
+            if player.reduce():
+                continue
+            else:
+                print('Bust! Your hand exceeded 21!')
+                print('Your hand value totals up to: ' + str(player.hand_value()))
+                turn = 'end'
 
 
 
