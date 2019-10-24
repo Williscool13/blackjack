@@ -1,4 +1,5 @@
 from random import shuffle
+from time import sleep
 
 class Card(object):
     def __init__(self, suit, value):
@@ -149,6 +150,7 @@ def blackjack():
     while turn == 'dealer':
         print("The dealer's hand currently contains: " + dealer.to_string())
         print('And has a value of: ' + str(dealer.hand_value()))
+        sleep(1)
         if dealer.is_invalid():
             if dealer.reduce():
                 continue
@@ -160,6 +162,7 @@ def blackjack():
             print('Dealer hits')
             dealer.add(deck.draw(1))
         else:
+            print("Dealer's hand exceeds 16, turn is over")
             turn = 'compare'
 
     print('-' * 50)
