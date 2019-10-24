@@ -43,7 +43,7 @@ class Hand(object):
         return self.hand_value() > 21
 
     def is_blackjack(self):
-        return self.hand_value == 21 and len(self.hand) == 2
+        return self.hand_value() == 21 and len(self.hand) == 2
 
 class Player(Hand):
     def __init__(self, name):
@@ -130,7 +130,6 @@ class Blackjack(object):
         print('-' * 50)
         print('The dealer draws 2 cards')
         self.dealer.add(self.deck.draw(2))
-        print('-' * 50)
 
     def player_turn(self):
         while True:
@@ -152,6 +151,7 @@ class Blackjack(object):
                     print('You lose, you overshot')
                     print(' ')
                     return 'end_l'
+
     def dealer_turn(self):
         while True:
             print("The dealer's hand currently contains: " + self.dealer.to_string())
@@ -173,80 +173,45 @@ class Blackjack(object):
             else:
                 return 'play'
 
-
-def blackjack():
-    print('Welcome to Blackjack')
-    deck = Deck(1)
-    deck.shuffle()
-    gamestate = 'unresolved'
-    deck.deck[-1] = deck.deck[0]
-    turn = 'player'
-
-    player = Player('Williscool')
-    dealer = Dealer()
-
-
-
-
-
-
-    if turn == 'compare':
-        if player.hand_value() == dealer.hand_value():
-            if player.is_blackjack() and dealer.is_blackjack():
-                print('Push! You both have Blackjacks!')
-                print("Dealer's hand: " + dealer.to_string())
-                print("Your hand: " + player.to_string())
-            elif player.is_blackjack():
-                print('You win, you have a Blackjack!')
-                print("Dealer's hand: " + dealer.to_string())
-                print("Your hand: " + player.to_string())
-            elif dealer.is_blackjack():
-                print("You lose, dealer has a Blackjack!")
-                print("Dealer's hand: " + dealer.to_string())
-                print("Your hand: " + player.to_string())
-            else:
-                print('Push! Your hands are equal!')
-                print('Hand value: ' + str(player.hand_value()))
-                print("Dealer's hand: " + dealer.to_string())
-                print("Your hand: " + player.to_string())
-        elif player.hand_value() > dealer.hand_value():
+    def comparison(self):
+        if self.player.hand_value() == self.dealer.hand_value():
+            print('Push!\nYour hands are equal!')
+            print('Hand value: ' + str(self.player.hand_value()))
+            print("Dealer's hand: " + self.dealer.to_string())
+            print("Your hand: " + self.player.to_string())
+            return 'end_d'
+        elif self.player.hand_value() > self.dealer.hand_value():
             print('You win! Your hand is more valuable than the dealer!')
-            print("Your hand: " + player.to_string())
-            print('Your hand value: ' + str(player.hand_value()))
-            print("Dealer's hand: " + dealer.to_string())
-            print("Dealer's hand value: " + str(dealer.hand_value()))
+            print("Your hand: " + self.player.to_string())
+            print('Your hand value: ' + str(self.player.hand_value()))
+            print("Dealer's hand: " + self.dealer.to_string())
+            print("Dealer's hand value: " + str(self.dealer.hand_value()))
+            return 'end_w'
         else:
             print("You lose! The dealer's hand is more valuable than yours!")
-            print("Dealer's hand: " + dealer.to_string())
-            print("Dealer's hand value: " + str(dealer.hand_value()))
-            print("Your hand: " + player.to_string())
-            print('Your hand value: ' + str(player.hand_value()))
-    elif turn == 'player_end':
-        print('Bust, you Lose! Your hand exceeds 21!')
-        print('Your hand value totals up to: ' + str(player.hand_value()))
-    elif turn == 'dealer_end':
-        print("Dealer bust, you Win! The dealer's hand exceeds 21")
-        print("The dealer's hand value totals up to: " + str(dealer.hand_value()))
-
-
-
+            print("Dealer's hand: " + self.dealer.to_string())
+            print("Dealer's hand value: " + str(self.dealer.hand_value()))
+            print("Your hand: " + self.player.to_string())
+            print('Your hand value: ' + str(self.player.hand_value()))
+            return 'end_l'
 
 
 def main():
     game = Blackjack()
     game.create_deck(1)
     game.initial_draw()
-    game_outcome = game.player_turn()
     print('-' * 50)
+    print("PLAYER's TURN")
+    game_outcome = game.player_turn()
     if game_outcome == 'play':
-        game.dealer_turn()
-    else:
-        print(player_outcome)
-    #blackjack()
-
-
-
-
+        print('-' * 50)
+        print("DEALER's TURN")
+        game_outcome = game.dealer_turn()
+    if game_outcome == 'play':
+        print('-' * 50)
+        print("COMPARISON TURN")
+        game_outcome = game.comparison()
+    print('-' * 10 + '\n' + game_outcome)
 
 if __name__ == '__main__':
     main()
