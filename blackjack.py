@@ -1,3 +1,5 @@
+from random import shuffle
+
 class Card(object):
     def __init__(self, suit, value):
         suit_dict = {0: 'Spades', 1: 'Hearts', 2: 'Clubs', 3: 'Diamonds'}
@@ -39,6 +41,9 @@ class Hand(object):
 
     def is_invalid(self):
         return self.hand_value() > 21
+
+    def is_blackjack(self):
+        return self.hand_value == 21 and len(self.hand) == 2
 
 class Player(Hand):
     def add(self, cards):
@@ -97,24 +102,35 @@ class Deck(object):
     def to_string(self):
         return(', '.join([card.to_string() for card in self.deck]))
 
+    def shuffle(self):
+        shuffle(self.deck)
+        print('Deck shuffled!')
 
 
 def blackjack():
     print('Welcome to Blackjack')
     deck = Deck(1)
+    deck.shuffle()
     gamestate = 'unresolved'
     deck.deck[-1] = deck.deck[0]
     #player's turn
     turn = 'player'
     player = Player()
     dealer = Dealer()
+    print('-' * 50)
     print('You draw 2 cards')
     player.add(deck.draw(2))
+    print('-' * 50)
     print('The dealer draws 2 cards')
     dealer.add(deck.draw(2))
+    print('-' * 50)
     while turn == 'player':
         print('Your hand currently contains: ' + player.to_string())
         print('And has a value of: ' + str(player.hand_value()))
+        if player.is_blackjack():
+            print('Blackjack! You got a perfect 21')
+            turn = 'dealer'
+            break
         decision = None
         while decision != 'H' and decision != 'S':
             decision = input('Would you like to (H)it or (S)tand? ').upper()
@@ -127,36 +143,65 @@ def blackjack():
             if player.reduce():
                 continue
             else:
-                print('Bust! Your hand exceeded 21!')
-                print('Your hand value totals up to: ' + str(player.hand_value()))
                 turn = 'player_end'
-
+    print('-' * 50)
 
     while turn == 'dealer':
         print("The dealer's hand currently contains: " + dealer.to_string())
         print('And has a value of: ' + str(dealer.hand_value()))
-        turn = 'compare'
-        while dealer.hand_value() < 18:
+        if dealer.is_invalid():
+            if dealer.reduce():
+                continue
+            else:
+                turn = 'dealer_end'
+                break
+
+        if dealer.hand_value() < 17:
             print('Dealer hits')
             dealer.add(deck.draw(1))
-            if dealer.is_invalid():
-                if dealer.reduce():
-                    continue
-                else:
-                    turn = 'dealer_end'
+        else:
+            turn = 'compare'
+
+    print('-' * 50)
 
 
     if turn == 'compare':
         if player.hand_value() == dealer.hand_value():
-            print('push, hands equal')
+            if player.is_blackjack() and dealer.is_blackjack():
+                print('Push! You both have Blackjacks!')
+                print("Dealer's hand: " + dealer.to_string())
+                print("Your hand: " + player.to_string())
+            elif player.is_blackjack():
+                print('You win, you have a Blackjack!')
+                print("Dealer's hand: " + dealer.to_string())
+                print("Your hand: " + player.to_string())
+            elif dealer.is_blackjack():
+                print("You lose, dealer has a Blackjack!")
+                print("Dealer's hand: " + dealer.to_string())
+                print("Your hand: " + player.to_string())
+            else:
+                print('Push! Your hands are equal!')
+                print('Hand value: ' + str(player.hand_value()))
+                print("Dealer's hand: " + dealer.to_string())
+                print("Your hand: " + player.to_string())
         elif player.hand_value() > dealer.hand_value():
-            print('win! your hand bigger')
+            print('You win! Your hand is more valuable than the dealer!')
+            print("Your hand: " + player.to_string())
+            print('Your hand value: ' + str(player.hand_value()))
+            print("Dealer's hand: " + dealer.to_string())
+            print("Dealer's hand value: " + str(dealer.hand_value()))
         else:
-            print('lose! your hand smaller')
+            print("You lose! The dealer's hand is more valuable than yours!")
+            print("Dealer's hand: " + dealer.to_string())
+            print("Dealer's hand value: " + str(dealer.hand_value()))
+            print("Your hand: " + player.to_string())
+            print('Your hand value: ' + str(player.hand_value()))
     elif turn == 'player_end':
-        print('lose! you bust')
+        print('Bust, you Lose! Your hand exceeds 21!')
+        print('Your hand value totals up to: ' + str(player.hand_value()))
     elif turn == 'dealer_end':
-        print('win! dealer bust')
+        print("Dealer bust, you Win! The dealer's hand exceeds 21")
+        print("The dealer's hand value totals up to: " + str(dealer.hand_value()))
 
 
 
