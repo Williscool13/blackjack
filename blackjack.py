@@ -15,7 +15,6 @@ class Card(object):
         else:
             self.value = value + 1
 
-
     def to_string(self):
         return 'The ' + self.title + ' of ' + self.suit
 
@@ -47,6 +46,10 @@ class Hand(object):
         return self.hand_value == 21 and len(self.hand) == 2
 
 class Player(Hand):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+
     def add(self, cards):
         for card in cards:
             self.hand.append(card)
@@ -89,7 +92,7 @@ class Deck(object):
 
     def draw(self, qty):
         cards_drawn = []
-        if not deck:
+        if not self.deck:
             self.refill_deck()
             self.shuffle()
         for i in range(qty):
@@ -110,6 +113,66 @@ class Deck(object):
         shuffle(self.deck)
         print('Deck shuffled!')
 
+class Blackjack(object):
+    def __init__(self):
+        self.deck = None
+        self.player = Player('Williscool')
+        self.dealer = Dealer()
+
+    def create_deck(self, multiplier):
+        self.deck = Deck(multiplier)
+        self.deck.shuffle()
+
+    def initial_draw(self):
+        print('-' * 50)
+        print('You draw 2 cards')
+        self.player.add(self.deck.draw(2))
+        print('-' * 50)
+        print('The dealer draws 2 cards')
+        self.dealer.add(self.deck.draw(2))
+        print('-' * 50)
+
+    def player_turn(self):
+        while True:
+            print('Your hand currently contains: ' + self.player.to_string())
+            print('And has a value of: ' + str(self.player.hand_value()))
+            if self.player.is_blackjack():
+                print('Blackjack! You got a perfect 21')
+                return 'end_w'
+            decision = None
+            while decision != 'H' and decision != 'S':
+                decision = input('Would you like to (H)it or (S)tand? ').upper()
+            if decision == 'H':
+                self.player.add(self.deck.draw(1))
+            else:
+                return 'play'
+
+            if self.player.is_invalid():
+                if not self.player.reduce():
+                    print('You lose, you overshot')
+                    print(' ')
+                    return 'end_l'
+    def dealer_turn(self):
+        while True:
+            print("The dealer's hand currently contains: " + self.dealer.to_string())
+            print('And has a value of: ' + str(self.dealer.hand_value()))
+            sleep(2)
+            if self.dealer.is_blackjack():
+                print("Blackjack! The dealer got a perfect 21")
+                print('you lose')
+                return 'end_l'
+
+            if self.dealer.is_invalid():
+                if not self.dealer.reduce():
+                    print('you win, dealer overshot')
+                    return 'end_w'
+
+            if self.dealer.hand_value() < 17:
+                print('Dealer hits')
+                self.dealer.add(self.deck.draw(1))
+            else:
+                return 'play'
+
 
 def blackjack():
     print('Welcome to Blackjack')
@@ -117,58 +180,14 @@ def blackjack():
     deck.shuffle()
     gamestate = 'unresolved'
     deck.deck[-1] = deck.deck[0]
-    #player's turn
     turn = 'player'
-    player = Player()
+
+    player = Player('Williscool')
     dealer = Dealer()
-    print('-' * 50)
-    print('You draw 2 cards')
-    player.add(deck.draw(2))
-    print('-' * 50)
-    print('The dealer draws 2 cards')
-    dealer.add(deck.draw(2))
-    print('-' * 50)
-    while turn == 'player':
-        print('Your hand currently contains: ' + player.to_string())
-        print('And has a value of: ' + str(player.hand_value()))
-        if player.is_blackjack():
-            print('Blackjack! You got a perfect 21')
-            turn = 'dealer'
-            break
-        decision = None
-        while decision != 'H' and decision != 'S':
-            decision = input('Would you like to (H)it or (S)tand? ').upper()
-        if decision == 'H':
-            player.add(deck.draw(1))
-        else:
-            turn = 'dealer'
 
-        if player.is_invalid():
-            if player.reduce():
-                continue
-            else:
-                turn = 'player_end'
-    print('-' * 50)
 
-    while turn == 'dealer':
-        print("The dealer's hand currently contains: " + dealer.to_string())
-        print('And has a value of: ' + str(dealer.hand_value()))
-        sleep(1)
-        if dealer.is_invalid():
-            if dealer.reduce():
-                continue
-            else:
-                turn = 'dealer_end'
-                break
 
-        if dealer.hand_value() < 17:
-            print('Dealer hits')
-            dealer.add(deck.draw(1))
-        else:
-            print("Dealer's hand exceeds 16, turn is over")
-            turn = 'compare'
 
-    print('-' * 50)
 
 
     if turn == 'compare':
@@ -214,7 +233,16 @@ def blackjack():
 
 
 def main():
-    blackjack()
+    game = Blackjack()
+    game.create_deck(1)
+    game.initial_draw()
+    game_outcome = game.player_turn()
+    print('-' * 50)
+    if game_outcome == 'play':
+        game.dealer_turn()
+    else:
+        print(player_outcome)
+    #blackjack()
 
 
 
