@@ -185,6 +185,12 @@ class Blackjack(object):
 
     def dealer_turn(self):
         while True:
+            if self.dealer.is_invalid():
+                if not self.dealer.reduce():
+                    print('-' * 50)
+                    print('Dealer Bust!')
+                    return 'de_w'
+
             print("The dealer's hand currently contains: " + self.dealer.to_string())
             print('And has a value of: ' + str(self.dealer.hand_value()))
             sleep(2)
@@ -193,11 +199,6 @@ class Blackjack(object):
                 print("Dealer Blackjack! The dealer got a perfect 21")
                 return 'de_l'
 
-            if self.dealer.is_invalid():
-                if not self.dealer.reduce():
-                    print('-' * 50)
-                    print('Dealer Bust!')
-                    return 'de_w'
 
             if self.dealer.hand_value() < 17:
                 print('Dealer hits')
@@ -270,30 +271,32 @@ def main():
             player1, player2, deck, dealer = game.player_split()
             games = [Blackjack(deck, player1, dealer),  Blackjack(deck, player2, dealer)]
 
-    dealer_play = []
+    player_outcome = []
     for index, game in enumerate(games):
         print('=' * 50)
         print("PLAYER's TURN" + str(index + 1))
-        dealer_play.append(game.player_turn())
+        player_outcome.append(game.player_turn())
 
 
-    game_outcome = None
-    if 'play' in dealer_play:
+    dealer_outcome = None
+    if 'play' in player_outcome:
         print('=' * 50)
         print("DEALER's TURN ")
-        game_outcome = games[0].dealer_turn()
+        dealer_outcome = games[0].dealer_turn()
 
-
+    game_outcome = []
     for index, game in enumerate(games):
         print('=' * 50)
         print("COMPARISON TURN " + str(index + 1))
-        if dealer_play[index] == 'play' and game_outcome == 'play':
-            game_outcome = game.comparison()
+        if player_outcome[index] == 'play' and dealer_outcome == 'play':
+            game_outcome.append(game.comparison())
         else:
-            if dealer_play[index] != 'play':
-                game.raw_comparison(dealer_play[index])
+            if player_outcome[index] != 'play':
+                game.raw_comparison(player_outcome[index])
+                game_outcome.append(player_outcome[index])
             else:
                 game.raw_comparison(game_outcome)
+                game_outcome.append(game_outcome)
         sleep(3)
 
 
