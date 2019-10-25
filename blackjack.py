@@ -145,11 +145,14 @@ class Blackjack(object):
     def player_split(self):
         player1 = Player('player 1')
         player2 = Player('player 2')
-        card1, card2 = player.hand_split()
+        card1, card2 = self.player.hand_split()
         player1.add([card1], surpress = True)
         player2.add([card2], surpress = True)
-
-        return player1, player2
+        print('Hand 1:')
+        player1.add(self.deck.draw(1))
+        print('Hand 2:')
+        player2.add(self.deck.draw(1))
+        return player1, player2, self.deck, self.dealer
 
 
     def player_turn(self):
@@ -192,7 +195,7 @@ class Blackjack(object):
                 if not self.dealer.reduce():
                     print('-' * 50)
                     print('Dealer Bust!')
-                    print('You Win!')
+                    print('You Win Your Game(s)!')
                     return 'end_w'
 
             if self.dealer.hand_value() < 17:
@@ -201,27 +204,27 @@ class Blackjack(object):
             else:
                 return 'play'
 
-    def comparison(self, dealer):
-        if self.player.hand_value() == dealer.hand_value():
+    def comparison(self):
+        if self.player.hand_value() == self.dealer.hand_value():
             print('-' * 50)
             print('Push!\nYour hands are equal!')
             print('Hand value: ' + str(self.player.hand_value()))
-            print("Dealer's hand: " + dealer.to_string())
+            print("Dealer's hand: " + self.dealer.to_string())
             print("Your hand: " + self.player.to_string())
             return 'end_d'
-        elif self.player.hand_value() > dealer.hand_value():
+        elif self.player.hand_value() > self.dealer.hand_value():
             print('-' * 50)
             print('You win! Your hand is more valuable than the dealer!')
             print("Your hand: " + self.player.to_string())
             print('Your hand value: ' + str(self.player.hand_value()))
-            print("Dealer's hand: " + dealer.to_string())
-            print("Dealer's hand value: " + str(dealer.hand_value()))
+            print("Dealer's hand: " + self.dealer.to_string())
+            print("Dealer's hand value: " + str(self.dealer.hand_value()))
             return 'end_w'
         else:
             print('-' * 50)
             print("You lose! The dealer's hand is more valuable than yours!")
-            print("Dealer's hand: " + dealer.to_string())
-            print("Dealer's hand value: " + str(dealer.hand_value()))
+            print("Dealer's hand: " + self.dealer.to_string())
+            print("Dealer's hand value: " + str(self.dealer.hand_value()))
             print("Your hand: " + self.player.to_string())
             print('Your hand value: ' + str(self.player.hand_value()))
             return 'end_l'
@@ -236,6 +239,8 @@ def main():
     print('Welcome to Blackjack!')
 
     game.create_deck(1)
+    game.deck.deck[-1] = Card(0,10)
+    game.deck.deck[-2] = Card(0,11)
     game.initial_draw()
     games = [game]
     if games[0].player.is_splitable():
@@ -243,32 +248,29 @@ def main():
         while split_ask != 'y' and split_ask != 'n':
             split_ask = input('Would you like to split your hand? (y/n)')
         if split_ask == 'y':
-            player1, player2 = game.player.player_split()
-            player1.add(game.deck.draw(1))
-            player2.add(game.deck.draw(1))
-            games = [Blackjack(game.deck, player1),  Blackjack(game.deck, player2)]
-            games[0].dealer = game.dealer
+            player1, player2, deck, dealer = game.player_split()
+            games = [Blackjack(deck, player1, dealer),  Blackjack(deck, player2, dealer)]
 
     dealer_play = []
     for game in games:
-        game_outcome = 'play'
-        if game_outcome == 'play':
-            print('-' * 50)
-            print("PLAYER's TURN")
-            dealer_play.append(game.player_turn())
+        print('-' * 50)
+        print("PLAYER's TURN")
+        dealer_play.append(game.player_turn())
+
+
 
     if 'play' in dealer_play:
         print('-' * 50)
         print("DEALER's TURN")
         game_outcome = games[0].dealer_turn()
 
-        if game_outcome == 'play':
-            for index, game in enumerate(games):
-                if dealer_play[index] == 'play':
-                    print('-' * 50)
-                    print("COMPARISON TURN")
-                    game_outcome = game.comparison(games[0].dealer)
-                    sleep(2)
+    if game_outcome == 'play':
+        for index, game in enumerate(games):
+            if dealer_play[index] == 'play':
+                print('-' * 50)
+                print("COMPARISON TURN")
+                game_outcome = game.comparison()
+                sleep(2)
 
 
 if __name__ == '__main__':
