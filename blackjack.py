@@ -283,18 +283,18 @@ def main():
         print("DEALER's TURN ")
         game_outcome = games[0].dealer_turn()
 
-    if game_outcome == 'play' or not 'play' in game_outcome:
-        for index, game in enumerate(games):
-            print('=' * 50)
-            print("COMPARISON TURN " + str(index + 1))
-            if dealer_play[index] == 'play' and game_outcome == 'play':
-                game_outcome = game.comparison()
+
+    for index, game in enumerate(games):
+        print('=' * 50)
+        print("COMPARISON TURN " + str(index + 1))
+        if dealer_play[index] == 'play' and game_outcome == 'play':
+            game_outcome = game.comparison()
+        else:
+            if dealer_play[index] != 'play':
+                game.raw_comparison(dealer_play[index])
             else:
-                if dealer_play[index] != 'play':
-                    game.raw_comparison(dealer_play[index])
-                else:
-                    game.raw_comparison(game_outcome)
-            sleep(3)
+                game.raw_comparison(game_outcome)
+        sleep(3)
 
 
 if __name__ == '__main__':
