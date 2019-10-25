@@ -50,10 +50,11 @@ class Player(Hand):
         super().__init__()
         self.name = name
 
-    def add(self, cards):
+    def add(self, cards, surpress = False):
         for card in cards:
             self.hand.append(card)
-            print('You drew ' + card.to_string())
+            if not surpress:
+                print('You drew ' + card.to_string())
 
     def reduce(self):
         for card in self.hand:
@@ -63,13 +64,8 @@ class Player(Hand):
                 return True
         return False
 
-    def player_split(self):
-        player1 = Player('Williscool1')
-        player2 = Player('Williscool2')
-        player1.add([self.hand[0]])
-        player2.add([self.hand[1]])
-
-        return player1, player2
+    def hand_split(self):
+        return self.hand[0], self.hand[1]
 
     def is_splitable(self):
         return len(self.hand) == 2 and self.hand[0].value == self.hand[1].value
@@ -126,10 +122,13 @@ class Deck(object):
         print('Deck shuffled!')
 
 class Blackjack(object):
-    def __init__(self, deck = None, player = Player('single')):
+    def __init__(self, deck = None, player = Player('player 0'), dealer = Dealer()):
         self.deck = deck
         self.player = player
-        self.dealer = Dealer()
+        self.dealer = dealer
+
+    def get_dealer(self):
+        return self.dealer
 
     def create_deck(self, multiplier):
         self.deck = Deck(multiplier)
@@ -142,6 +141,16 @@ class Blackjack(object):
         print('-' * 50)
         print('The dealer draws 2 cards')
         self.dealer.add(self.deck.draw(2))
+
+    def player_split(self):
+        player1 = Player('player 1')
+        player2 = Player('player 2')
+        card1, card2 = player.hand_split()
+        player1.add([card1], surpress = True)
+        player2.add([card2], surpress = True)
+
+        return player1, player2
+
 
     def player_turn(self):
         while True:
@@ -222,12 +231,14 @@ def main():
 #    play = None
 #    while play != 'y' and play != 'n':
 #        play = input('Would you like to play a game? (y/n)').lower()
+
     game = Blackjack()
     print('Welcome to Blackjack!')
+
     game.create_deck(1)
     game.initial_draw()
     games = [game]
-    if game.player.is_splitable():
+    if games[0].player.is_splitable():
         split_ask = None
         while split_ask != 'y' and split_ask != 'n':
             split_ask = input('Would you like to split your hand? (y/n)')
