@@ -185,15 +185,15 @@ class Blackjack(object):
 
     def dealer_turn(self):
         while True:
+            print("The dealer's hand currently contains: " + self.dealer.to_string())
+            print('And has a value of: ' + str(self.dealer.hand_value()))
+            sleep(2)
             if self.dealer.is_invalid():
                 if not self.dealer.reduce():
                     print('-' * 50)
                     print('Dealer Bust!')
                     return 'de_w'
 
-            print("The dealer's hand currently contains: " + self.dealer.to_string())
-            print('And has a value of: ' + str(self.dealer.hand_value()))
-            sleep(2)
             if self.dealer.is_blackjack():
                 print('-' * 50)
                 print("Dealer Blackjack! The dealer got a perfect 21")
@@ -214,7 +214,7 @@ class Blackjack(object):
             print('Hand value: ' + str(self.player.hand_value()))
             print("Dealer's hand: " + self.dealer.to_string())
             print("Your hand: " + self.player.to_string())
-            return 'end_d'
+            return 'co_d'
         elif self.player.hand_value() > self.dealer.hand_value():
             print('-' * 50)
             print('You win! Your hand is more valuable than the dealer!')
@@ -222,7 +222,7 @@ class Blackjack(object):
             print('Your hand value: ' + str(self.player.hand_value()))
             print("Dealer's hand: " + self.dealer.to_string())
             print("Dealer's hand value: " + str(self.dealer.hand_value()))
-            return 'end_w'
+            return 'co_w'
         else:
             print('-' * 50)
             print("You lose! The dealer's hand is more valuable than yours!")
@@ -230,7 +230,7 @@ class Blackjack(object):
             print("Dealer's hand value: " + str(self.dealer.hand_value()))
             print("Your hand: " + self.player.to_string())
             print('Your hand value: ' + str(self.player.hand_value()))
-            return 'end_l'
+            return 'co_l'
     def raw_comparison(self, version):
         if version == 'pl_w':
             print('You got a Blackjack! Perfect 21!')
@@ -295,10 +295,10 @@ def main():
                 game.raw_comparison(player_outcome[index])
                 game_outcome.append(player_outcome[index])
             else:
-                game.raw_comparison(game_outcome)
+                game.raw_comparison(dealer_outcome)
                 game_outcome.append(game_outcome)
         sleep(3)
 
-
+    print(game_outcome)
 if __name__ == '__main__':
     main()
