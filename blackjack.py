@@ -74,6 +74,13 @@ class Player(Hand):
     def is_auto(self):
         return self.auto
 
+
+    def auto_play(self):
+
+    def auto_split(self):
+        
+
+
 class Dealer(Hand):
     def add(self, cards, surpress = False):
         for card in cards:
@@ -166,7 +173,7 @@ class Blackjack(object):
     def player_turn(self):
         while True:
             if self.player.is_auto():
-                pass
+                decision = self.player.auto_play()
             else:
                 print('Your hand currently contains: ' + self.player.to_string())
                 print('And has a value of: ' + str(self.player.hand_value()))
@@ -257,16 +264,20 @@ class Blackjack(object):
             print('You Win!')
 
     def game_instance(self):
-        self.create_deck(1)
+        print('Game Start!')
+        print('=' * 50)
         self.deck.deck[-1] = Card(0,10)
         self.deck.deck[-2] = Card(0,11)
         self.initial_draw()
         games = [self]
         if self.player.is_splitable():
-            print('=' * 50)
-            split_ask = None
-            while split_ask != 'y' and split_ask != 'n':
-                split_ask = input('Would you like to split your hand? (y/n)')
+            if self.player.is_auto():
+                split_ask = player.auto_split()
+            else:
+                print('=' * 50)
+                split_ask = None
+                while split_ask != 'y' and split_ask != 'n':
+                    split_ask = input('Would you like to split your hand? (y/n)')
             if split_ask == 'y':
                 print('-' * 50)
                 player1, player2 = self.player_split()
@@ -305,8 +316,13 @@ def main():
 #    play = None
 #    while play != 'y' and play != 'n':
 #        play = input('Would you like to play a game? (y/n)').lower()
-    game = Blackjack()
-    outcome = game.game_instance()
+
+    main_deck = Deck(1)
+    main_deck.shuffle()
+    auto_player = Player('bot', auto = True)
+    for i in range(10):
+        game = Blackjack(main_deck, player = auto_player)
+        outcome = game.game_instance()
 
     for x in outcome:
         print(x[-1])
