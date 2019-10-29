@@ -1,6 +1,19 @@
 from random import shuffle
 from time import sleep
 
+
+class Wallet(object):
+    def __init__(self, starting = 200):
+        self.balance = starting
+
+    def increase(self, qty):
+        self.balance += qty
+        print('New Balance', self.balance)
+
+    def decrease(self, qty):
+        self.balance -= qty
+        print('New Balance', self.balance)
+
 class Card(object):
     def __init__(self, suit, value):
         suit_dict = {0: 'Spades', 1: 'Hearts', 2: 'Clubs', 3: 'Diamonds'}
@@ -46,10 +59,11 @@ class Hand(object):
         return self.hand_value() == 21 and len(self.hand) == 2
 
 class Player(Hand):
-    def __init__(self, name, auto = False):
+    def __init__(self, name, auto = False, starting = 200):
         super().__init__()
         self.name = name
         self.auto = auto
+        self.wallet = Wallet(starting)
 
     def add(self, cards, surpress = False):
         for card in cards:
@@ -75,10 +89,10 @@ class Player(Hand):
         return self.auto
 
 
-    def auto_play(self):
-
-    def auto_split(self):
-        
+    def auto_play(self, upcard):
+        pass
+    def auto_split(self, upcard):
+        pass
 
 
 class Dealer(Hand):
@@ -96,6 +110,8 @@ class Dealer(Hand):
                 return True
         return False
 
+    def dealer_up(self):
+        return self.deck[0]
 class Deck(object):
     '''The Deck class
     Representation of the deck object as a class.
@@ -173,7 +189,7 @@ class Blackjack(object):
     def player_turn(self):
         while True:
             if self.player.is_auto():
-                decision = self.player.auto_play()
+                decision = self.player.auto_play(self.dealer.up_card())
             else:
                 print('Your hand currently contains: ' + self.player.to_string())
                 print('And has a value of: ' + str(self.player.hand_value()))
@@ -265,16 +281,15 @@ class Blackjack(object):
 
     def game_instance(self):
         print('Game Start!')
-        print('=' * 50)
         self.deck.deck[-1] = Card(0,10)
         self.deck.deck[-2] = Card(0,11)
         self.initial_draw()
+        print('=' * 50)
         games = [self]
         if self.player.is_splitable():
             if self.player.is_auto():
-                split_ask = player.auto_split()
+                split_ask = player.auto_split(self.dealer.up_card())
             else:
-                print('=' * 50)
                 split_ask = None
                 while split_ask != 'y' and split_ask != 'n':
                     split_ask = input('Would you like to split your hand? (y/n)')
@@ -312,6 +327,7 @@ class Blackjack(object):
 
         return game_outcome
 
+
 def main():
 #    play = None
 #    while play != 'y' and play != 'n':
@@ -320,13 +336,13 @@ def main():
     main_deck = Deck(1)
     main_deck.shuffle()
     auto_player = Player('bot', auto = True)
-    for i in range(10):
-        game = Blackjack(main_deck, player = auto_player)
-        outcome = game.game_instance()
 
-    for x in outcome:
-        print(x[-1])
+    game = Blackjack(main_deck)
+    outcome = game.game_instance()
+
+
 
 
 if __name__ == '__main__':
     main()
+
