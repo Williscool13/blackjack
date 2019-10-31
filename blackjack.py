@@ -6,6 +6,9 @@ class Wallet(object):
     def __init__(self, starting = 200):
         self.balance = starting
 
+    def current_balance(self):
+        return str(self.balance)
+
     def increase(self, qty):
         self.balance += qty
         print('New Balance', self.balance)
@@ -63,7 +66,6 @@ class Player(Hand):
         super().__init__()
         self.name = name
         self.auto = auto
-        self.wallet = Wallet(starting)
 
     def add(self, cards, surpress = False):
         for card in cards:
@@ -93,6 +95,19 @@ class Player(Hand):
         pass
     def auto_split(self, upcard):
         pass
+
+
+'''
+    def balance(self):
+        return self.wallet.total()
+
+    def player_win(self, value):
+        self.wallet.increase(value)
+
+    def player_lose(self, value):
+        self.wallet.decrease(value)
+'''
+
 
 
 class Dealer(Hand):
@@ -154,6 +169,7 @@ class Blackjack(object):
         self.deck = deck
         self.player = player
         self.dealer = dealer
+        self.double = False
 
     def get_dealer(self):
         return self.dealer
@@ -196,8 +212,8 @@ class Blackjack(object):
                 print('And has a value of: ' + str(self.player.hand_value()))
                 if self.player.is_blackjack():
                     print('Blackjack!')
-                    sleep(3)
-                    return 'pl_w', False
+                    sleep(2)
+                    return 'pl_w'
                 decision = None
                 if turn:
                     while decision != 'H' and decision != 'S' and decision != 'D':
@@ -206,10 +222,13 @@ class Blackjack(object):
                 else:
                     while decision != 'H' and decision != 'S':
                         decision = input('Would you like to (H)it or (S)tand? ').upper()
-            if decision == 'H' or decision == 'D':
+            if decision == 'H':
                 self.player.add(self.deck.draw(1))
+            elif decision == 'D':
+                self.player.add(self.deck.draw(1))
+                self.double = True
             else:
-                return 'play', False
+                return 'play'
 
             if self.player.is_invalid():
                 if not self.player.reduce():
@@ -217,12 +236,13 @@ class Blackjack(object):
                     print('Your hand currently contains: ' + self.player.to_string())
                     print('And has a value of: ' + str(self.player.hand_value()))
                     print('Bust!')
-                    if decision == 'D':
-                        return 'pl_l', True
-                    else:
-                        return 'pl_l', False
+                    return 'pl_l'
+
             if decision == 'D':
-                return 'play', True
+                self.double = True
+                print('Your hand currently contains: ' + self.player.to_string())
+                print('And has a value of: ' + str(self.player.hand_value()))
+                return 'play'
 
     def dealer_turn(self):
         while True:
@@ -253,18 +273,17 @@ class Blackjack(object):
     def comparison(self):
         if self.player.hand_value() == self.dealer.hand_value():
             print('-' * 50)
-            print('Push!\nYour hands are equal!')
-            print('Hand value: ' + str(self.player.hand_value()))
-            print("Dealer's hand: " + self.dealer.to_string())
-            print("Your hand: " + self.player.to_string())
+            print('Your hands are equal.')
+            print('Push!')
             return 'co_d'
         elif self.player.hand_value() > self.dealer.hand_value():
             print('-' * 50)
-            print('You win! Your hand is more valuable than the dealer!')
+            print('Your hand is more valuable than the dealer.')
             print("Your hand: " + self.player.to_string())
-            print('Your hand value: ' + str(self.player.hand_value()))
             print("Dealer's hand: " + self.dealer.to_string())
-            print("Dealer's hand value: " + str(self.dealer.hand_value()))
+            print('You Win!')
+            if self.double:
+                print('Double Winnings!')
             return 'co_w'
         else:
             print('-' * 50)
@@ -273,6 +292,8 @@ class Blackjack(object):
             print("Dealer's hand value: " + str(self.dealer.hand_value()))
             print("Your hand: " + self.player.to_string())
             print('Your hand value: ' + str(self.player.hand_value()))
+            if self.double:
+                print('Double Losses!')
             return 'co_l'
     def raw_comparison(self, version):
         if version == 'pl_w':
@@ -281,12 +302,18 @@ class Blackjack(object):
             sleep(3)
         if version == 'pl_l':
             print('You Busted! You went above 21!')
+            if self.double:
+                print('Double Losses!')
             print('You Lose!')
         if version == 'de_l':
             print('Dealer Blackjack! Perfect 21!')
+            if self.double:
+                print('Double Losses!')
             print('You Lose!')
         if version == 'de_w':
             print('Dealer Busted! Dealer went above 21!')
+            if self.double:
+                print('Double Winnings!')
             print('You Win!')
 
     def game_instance(self):
@@ -313,9 +340,8 @@ class Blackjack(object):
         for index, instance in enumerate(games):
             print('=' * 50)
             print("PLAYER's TURN", index + 1)
-            this_play, this_double = instance.player_turn()
-            player_outcome.append(this_play)
-            double.append(this_double)
+            player_outcome.append(instance.player_turn())
+            double.append(instance.double)
 
         dealer_outcome = None
         if 'play' in player_outcome:
@@ -338,21 +364,25 @@ class Blackjack(object):
                 #if dealer bust or 21
                 else:
                     self.raw_comparison(dealer_outcome)
-                    game_outcome.append(game_outcome)
+                    game_outcome.append(dealer_outcome)
             sleep(3)
 
-        return game_outcome
 
+
+        print(game_outcome)
+        print(double)
+        return game_outcome
 
 def main():
 #    play = None
 #    while play != 'y' and play != 'n':
 #        play = input('Would you like to play a game? (y/n)').lower()
-
+    wallet = Wallet(200)
     main_deck = Deck(1)
     main_deck.shuffle()
-    auto_player = Player('bot', auto = True)
 
+    auto_player = Player('bot', auto = True)
+    bet = input('How much money would you like to bet? (Wallet: ' + wallet.current_balance() + ')\n')
     game = Blackjack(main_deck)
     outcome = game.game_instance()
 
