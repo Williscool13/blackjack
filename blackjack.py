@@ -336,12 +336,12 @@ class Blackjack(object):
                 games = [Blackjack(self.deck, player1, self.dealer),  Blackjack(self.deck, player2, self.dealer)]
 
         player_outcome = []
-        double = []
+        doubles = []
         for index, instance in enumerate(games):
             print('=' * 50)
             print("PLAYER's TURN", index + 1)
             player_outcome.append(instance.player_turn())
-            double.append(instance.double)
+            doubles.append(instance.double)
 
         dealer_outcome = None
         if 'play' in player_outcome:
@@ -370,8 +370,8 @@ class Blackjack(object):
 
 
         print(game_outcome)
-        print(double)
-        return game_outcome
+        print(doubles)
+        return game_outcome, doubles
 
 def main():
 #    play = None
@@ -384,10 +384,19 @@ def main():
     auto_player = Player('bot', auto = True)
     bet = input('How much money would you like to bet? (Wallet: ' + wallet.current_balance() + ')\n')
     game = Blackjack(main_deck)
-    outcome = game.game_instance()
-
-
-
+    outcomes, doubles = game.game_instance()
+    for index, outcome in enumerate(outcomes):
+        if outcome[-1] == 'w':
+            if doubles[index]:
+                wallet.increase(bet * 2)
+            else:
+                wallet.increase(bet)
+        if outcome[-1] == 'l':
+            if doubles[index]:
+                wallet.decrease(bet * 2)
+            else:
+                wallet.decrease(bet)
+    print(wallet.current_balance())
 
 if __name__ == '__main__':
     main()
