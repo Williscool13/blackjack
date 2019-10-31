@@ -187,6 +187,7 @@ class Blackjack(object):
 
 
     def player_turn(self):
+        turn = True
         while True:
             if self.player.is_auto():
                 decision = self.player.auto_play(self.dealer.up_card())
@@ -196,15 +197,19 @@ class Blackjack(object):
                 if self.player.is_blackjack():
                     print('Blackjack!')
                     sleep(3)
-                    return 'pl_w'
+                    return 'pl_w', False
                 decision = None
-                while decision != 'H' and decision != 'S':
-                    decision = input('Would you like to (H)it or (S)tand? ').upper()
-
-            if decision == 'H':
+                if turn:
+                    while decision != 'H' and decision != 'S' and decision != 'D':
+                        decision = input('Would you like to (D)ouble, (H)it, or (S)tand').upper()
+                    turn = False
+                else:
+                    while decision != 'H' and decision != 'S':
+                        decision = input('Would you like to (H)it or (S)tand? ').upper()
+            if decision == 'H' or decision == 'D':
                 self.player.add(self.deck.draw(1))
             else:
-                return 'play'
+                return 'play', False
 
             if self.player.is_invalid():
                 if not self.player.reduce():
@@ -212,7 +217,12 @@ class Blackjack(object):
                     print('Your hand currently contains: ' + self.player.to_string())
                     print('And has a value of: ' + str(self.player.hand_value()))
                     print('Bust!')
-                    return 'pl_l'
+                    if decision == 'D':
+                        return 'pl_l', True
+                    else:
+                        return 'pl_l', False
+            if decision == 'D':
+                return 'play', True
 
     def dealer_turn(self):
         while True:
@@ -299,10 +309,13 @@ class Blackjack(object):
                 games = [Blackjack(self.deck, player1, self.dealer),  Blackjack(self.deck, player2, self.dealer)]
 
         player_outcome = []
+        double = []
         for index, instance in enumerate(games):
             print('=' * 50)
             print("PLAYER's TURN", index + 1)
-            player_outcome.append(instance.player_turn())
+            this_play, this_double = instance.player_turn()
+            player_outcome.append(this_play)
+            double.append(this_double)
 
         dealer_outcome = None
         if 'play' in player_outcome:
@@ -314,12 +327,15 @@ class Blackjack(object):
         for index, game in enumerate(games):
             print('=' * 50)
             print("COMPARISON TURN " + str(index + 1))
+            #if both player and dealer dont bust
             if player_outcome[index] == 'play' and dealer_outcome == 'play':
                 game_outcome.append(game.comparison())
             else:
+                #if player busts or 21
                 if player_outcome[index] != 'play':
                     self.raw_comparison(player_outcome[index])
                     game_outcome.append(player_outcome[index])
+                #if dealer bust or 21
                 else:
                     self.raw_comparison(dealer_outcome)
                     game_outcome.append(game_outcome)
