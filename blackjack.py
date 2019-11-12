@@ -11,11 +11,11 @@ class Wallet(object):
 
     def increase(self, qty):
         self.balance += qty
-        print('New Balance', self.balance)
+        print('Your New Balance', self.balance)
 
     def decrease(self, qty):
         self.balance -= qty
-        print('New Balance', self.balance)
+        print('Your New Balance', self.balance)
 
 class Card(object):
     def __init__(self, suit, value):
@@ -382,7 +382,7 @@ def main():
     main_deck.shuffle()
 
     auto_player = Player('bot', auto = True)
-    bet = input('How much money would you like to bet? (Wallet: ' + wallet.current_balance() + ')\n')
+    bet = int(input('How much money would you like to bet? (Wallet: ' + wallet.current_balance() + ')\n'))
     game = Blackjack(main_deck)
     outcomes, doubles = game.game_instance()
     for index, outcome in enumerate(outcomes):
@@ -396,7 +396,6 @@ def main():
                 wallet.decrease(bet * 2)
             else:
                 wallet.decrease(bet)
-    print(wallet.current_balance())
 
 if __name__ == '__main__':
     main()
